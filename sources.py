@@ -1,7 +1,7 @@
 # sources.py
 #
 # Author:	Ryan Afzal
-# Date:		2026-10-14
+# Date:		2026-10-15
 #
 # Various methods for retreiving a nuclide dictionary.
 
