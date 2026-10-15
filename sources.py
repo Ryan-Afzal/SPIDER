@@ -25,7 +25,7 @@ def getNuclidesFromNDX(path: str) -> dict:
 
 	# NDX files use the following format:
 	# 	Nuclide (parent) name; ex. Pu-239
-	#	Half-life with unit; ex. 2.39E4y
+	#	Half-life with unit; ex. 2.39E+4y
 	#	(unused) Decay modes; A (alpha), B- (beta-), B+ (beta+), EC (electron capture), IT (internal transition), SF (spontaneous fission)
 	#	(unused) Pointer-1 I7 Location of nuclide in ICRP-07.RAD file
 	#	(unused) Pointer-2 I7 Location of nuclide in ICRP-07.BET file
