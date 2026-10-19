@@ -33,8 +33,8 @@ class TestDecaySolver(unittest.TestCase):
 	def test_specificActivity(self):
 		"""Tests getSpecificActivity() to within 5 decimal places."""
 		decaySolver = spider.DecaySolver(self._nuclides)
-		sa = 1/238.050787 * 1000 * spider.NA * math.log(2)/(4.463E9*3600*24*365)
-		self.assertAlmostEqual(decaySolver.getSpecificActivity('U-238'), sa, 5)
+		sa = math.log(2)/(4.463E9*365*24*3600) * 1/238.050787 * 1000 * spider.NA
+		self.assertEqual(decaySolver.getSpecificActivity('U-238'), sa)
 	def test_getAtomsFromMass(self):
 		"""Tests getAtomsFromMass()."""
 		decaySolver = spider.DecaySolver(self._nuclides)
@@ -113,8 +113,6 @@ class TestDecaySolver(unittest.TestCase):
 			total, d = decaySolver.getTotalActivityAtTime(n0, 'Pa-234', t)
 			self.assertEqual(d['Pa-234'], predActivityPa234(t))
 			self.assertEqual(d['U-234'], predActivityU234(t))
-
-		
 	def test_getTotalActivityAtTime2(self):
 		"""Tests getTotalActivityAtTime() using Pa-234 from U-238 at various points in time."""
 		decaySolver = spider.DecaySolver(self._nuclides)
@@ -136,10 +134,10 @@ class TestDecaySolver(unittest.TestCase):
 		]
 
 		c1 = [
-			decaySolver.getDecayConstant('U-238'),
-			decaySolver.getDecayConstant('Th-234'),
-			decaySolver.getDecayConstant('Pa-234m'),
-			decaySolver.getDecayConstant('Pa-234'),
+			c[0],
+			c[1],
+			c[2],
+			c[3],
 			decaySolver.getDecayConstant('U-234')
 		]
 		b1 = [
@@ -149,10 +147,10 @@ class TestDecaySolver(unittest.TestCase):
 			1
 		]
 		c2 = [
-			decaySolver.getDecayConstant('U-238'),
-			decaySolver.getDecayConstant('Th-234'),
-			decaySolver.getDecayConstant('Pa-234m'),
-			decaySolver.getDecayConstant('U-234')
+			c[0],
+			c[1],
+			c[2],
+			c1[4]
 		]
 		b2 = [
 			1,
@@ -170,15 +168,23 @@ class TestDecaySolver(unittest.TestCase):
 			activity = 0
 			for item in matrix:
 				activity += item[1]*math.exp(-item[0]*t)
-			return activity*n0*c[-1]
+			activity *= (c[-1]*n0)
+			return activity
 
 		def predActivityU234(t):
-			activity = 0
-			for item in matrix1:
-				activity += item[1]*math.exp(-item[0]*t)
-			for item in matrix2:
-				activity += item[1]*math.exp(-item[0]*t)
-			return activity*n0*c1[-1]
+			return predActivityU2341(t) + predActivityU2342(t)
+		def predActivityU2341(t):
+					activity = 0.0
+					for item in matrix1:
+						activity += item[1]*math.exp(-item[0]*t)
+					activity *= (c1[-1]*n0)
+					return activity
+		def predActivityU2342(t):
+					activity = 0.0
+					for item in matrix2:
+						activity += item[1]*math.exp(-item[0]*t)
+					activity *= (c2[-1]*n0)
+					return activity
 
 		times = [1E-3, 1E-2, 1E-1, 1, 1E1, 1E2, 1E3, 1E4, 1E5]
 		for time in times:
