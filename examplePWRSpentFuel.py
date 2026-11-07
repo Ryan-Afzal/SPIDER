@@ -57,8 +57,6 @@ decaySolver = spider.DecaySolver(sources.getNuclidesFromNDX('ICRP-07.NDX'))
 # TODO: Input a dictionary of coefficients here. It should be in the form:
 # { 'Nuclide': coefficient }, ex. {'Pu-239': 1E-8 }
 coefficientDict = {}
-import effectiveRadiotoxicity as er
-coefficientDict = er.coefficientsDict
 
 
 
