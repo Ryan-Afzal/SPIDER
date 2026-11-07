@@ -3,7 +3,7 @@
 # Author:	Ryan Afzal
 # Date:		2026-10-15
 #
-# Unit test script to verify sources.py using the ICRP-07.NDX dataset.
+# Unit test script to verify sources.py using the ICRP Publication 107 dataset.
 #
 # To test, place the ICRP-07.NDX file in the same directory and run.
 
