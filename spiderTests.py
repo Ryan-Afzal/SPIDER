@@ -5,9 +5,8 @@
 #
 # Unit test script to verify spider.py
 
-import spider
-
 import math
+import src.spider as spider
 import unittest
 
 class TestSPIDER(unittest.TestCase):
@@ -28,34 +27,34 @@ class TestDecaySolver(unittest.TestCase):
 	
 	def test_halfLife(self):
 		"""Tests getHalfLife()."""
-		decaySolver = spider.DecaySolver(self._nuclides)
-		self.assertEqual(decaySolver.getHalfLife('Pa-234m'), 1.159*60)
+		solver = spider.DecaySolver(self._nuclides)
+		self.assertEqual(solver.getHalfLife('Pa-234m'), 1.159*60)
 	def test_specificActivity(self):
 		"""Tests getSpecificActivity() to within 5 decimal places."""
-		decaySolver = spider.DecaySolver(self._nuclides)
+		solver = spider.DecaySolver(self._nuclides)
 		sa = math.log(2)/(4.463E9*365*24*3600) * 1/238.050787 * 1000 * spider.NA
-		self.assertEqual(decaySolver.getSpecificActivity('U-238'), sa)
+		self.assertEqual(solver.getSpecificActivity('U-238'), sa)
 	def test_getAtomsFromMass(self):
 		"""Tests getAtomsFromMass()."""
-		decaySolver = spider.DecaySolver(self._nuclides)
+		solver = spider.DecaySolver(self._nuclides)
 		m = 6.7
 		a = m * 1000 / 238.050787 * 6.022E23
-		self.assertEqual(decaySolver.getAtomsFromMass(m, 'U-238'), a)
+		self.assertEqual(solver.getAtomsFromMass(m, 'U-238'), a)
 	def test__getMatrix(self):
 		"""
 		Tests _getMatrix() using the U-238 branching through Pa-234.
 		It calculates the matrix for U-238->Th-234->Pa-234m->Pa-234->U-234,
 		which would be used to determine the activity of U-234.
 		"""
-		decaySolver = spider.DecaySolver(self._nuclides)
+		solver = spider.DecaySolver(self._nuclides)
 
 		# Decay chain
 		c = [
-			decaySolver.getDecayConstant('U-238'),
-			decaySolver.getDecayConstant('Th-234'),
-			decaySolver.getDecayConstant('Pa-234m'),
-			decaySolver.getDecayConstant('Pa-234'),
-			decaySolver.getDecayConstant('U-234')
+			solver.getDecayConstant('U-238'),
+			solver.getDecayConstant('Th-234'),
+			solver.getDecayConstant('Pa-234m'),
+			solver.getDecayConstant('Pa-234'),
+			solver.getDecayConstant('U-234')
 		]
 
 		# Branching fractions (fraction going to the next element)
@@ -85,18 +84,18 @@ class TestDecaySolver(unittest.TestCase):
 			 ]
 		]
 
-		matrix = decaySolver._getMatrix(c, b)
+		matrix = solver._getMatrix(c, b)
 
 		for i in range(len(matrix)):
 			for j in range(2):
 				self.assertAlmostEqual(matrix[i][j], expectedMatrix[i][j], 7)
 	def test_getTotalActivityAtTime1(self):
 		"""Tests getTotalActivityAtTime() using Pa-234 at various times."""
-		decaySolver = spider.DecaySolver(self._nuclides)
+		solver = spider.DecaySolver(self._nuclides)
 		a0 = spider.CURIE
 
-		l0 = decaySolver.getDecayConstant('Pa-234')
-		l1 = decaySolver.getDecayConstant('U-234')
+		l0 = solver.getDecayConstant('Pa-234')
+		l1 = solver.getDecayConstant('U-234')
 		n0 = a0/l0
 
 		def predActivityPa234(t):
@@ -110,20 +109,20 @@ class TestDecaySolver(unittest.TestCase):
 		times = [1E-3, 1E-2, 1E-1, 1, 1E1, 1E2, 1E3, 1E4, 1E5]
 		for time in times:
 			t = time*spider.YEAR
-			total, d = decaySolver.getTotalActivityAtTime(n0, 'Pa-234', t)
+			total, d = solver.getTotalActivityAtTime(n0, 'Pa-234', t)
 			self.assertEqual(d['Pa-234'], predActivityPa234(t))
 			self.assertEqual(d['U-234'], predActivityU234(t))
 	def test_getTotalActivityAtTime2(self):
 		"""Tests getTotalActivityAtTime() using Pa-234 from U-238 at various points in time."""
-		decaySolver = spider.DecaySolver(self._nuclides)
+		solver = spider.DecaySolver(self._nuclides)
 		a0 = spider.CURIE
 
 		# Decay chain
 		c = [
-			decaySolver.getDecayConstant('U-238'),
-			decaySolver.getDecayConstant('Th-234'),
-			decaySolver.getDecayConstant('Pa-234m'),
-			decaySolver.getDecayConstant('Pa-234')
+			solver.getDecayConstant('U-238'),
+			solver.getDecayConstant('Th-234'),
+			solver.getDecayConstant('Pa-234m'),
+			solver.getDecayConstant('Pa-234')
 		]
 		
 		# Branching fractions (fraction going to the next element)
@@ -138,7 +137,7 @@ class TestDecaySolver(unittest.TestCase):
 			c[1],
 			c[2],
 			c[3],
-			decaySolver.getDecayConstant('U-234')
+			solver.getDecayConstant('U-234')
 		]
 		b1 = [
 			1,
@@ -160,9 +159,9 @@ class TestDecaySolver(unittest.TestCase):
 
 		n0 = a0 / c[0]
 
-		matrix = decaySolver._getMatrix(c, b)
-		matrix1 = decaySolver._getMatrix(c1, b1)
-		matrix2 = decaySolver._getMatrix(c2, b2)
+		matrix = solver._getMatrix(c, b)
+		matrix1 = solver._getMatrix(c1, b1)
+		matrix2 = solver._getMatrix(c2, b2)
 
 		def predActivityPa234(t):
 			activity = 0
@@ -189,7 +188,7 @@ class TestDecaySolver(unittest.TestCase):
 		times = [1E-3, 1E-2, 1E-1, 1, 1E1, 1E2, 1E3, 1E4, 1E5]
 		for time in times:
 			t = time*spider.YEAR
-			total, d = decaySolver.getTotalActivityAtTime(n0, 'U-238', t)
+			total, d = solver.getTotalActivityAtTime(n0, 'U-238', t)
 			self.assertEqual(d['Pa-234'], predActivityPa234(t))
 			self.assertEqual(d['U-234'], predActivityU234(t))
 

@@ -39,8 +39,9 @@
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-import sources
-import spider
+import src.sources as sources
+import src.spider as spider
+
 
 
 # ===============
@@ -50,7 +51,7 @@ import spider
 print('Loading data...')
 
 # Initialize decay solver, from ICRP-107.
-decaySolver = spider.DecaySolver(sources.getNuclidesFromNDX('ICRP-07.NDX'))
+solver = spider.DecaySolver(sources.getNuclidesFromNDX('ICRP-07.NDX'))
 
 # Dictionary of effective radiotoxicity conversion factors (Sv / Bq) per nuclide.
 
@@ -123,16 +124,16 @@ PWR_PLUTONIUM = {
 
 # Uranium in fresh PWR spent fuel, in Bq per assembly.
 PWR_URANIUM = {
-	'U-234': decaySolver.getActivityFromMass( 0.01*1E-2*PWR_M_U_FINAL, 'U-234'),
-	'U-235': decaySolver.getActivityFromMass( 0.79*1E-2*PWR_M_U_FINAL, 'U-235'),
-	'U-236': decaySolver.getActivityFromMass( 0.40*1E-2*PWR_M_U_FINAL, 'U-236'),
-	'U-238': decaySolver.getActivityFromMass(94.29*1E-2*PWR_M_U_FINAL, 'U-238')
+	'U-234': solver.getActivityFromMass( 0.01*1E-2*PWR_M_U_FINAL, 'U-234'),
+	'U-235': solver.getActivityFromMass( 0.79*1E-2*PWR_M_U_FINAL, 'U-235'),
+	'U-236': solver.getActivityFromMass( 0.40*1E-2*PWR_M_U_FINAL, 'U-236'),
+	'U-238': solver.getActivityFromMass(94.29*1E-2*PWR_M_U_FINAL, 'U-238')
 }
 
 # Initial uranium in a PWR fuel assembly, in Bq per assembly.
 PWR_INIT_URANIUM = {
-	'U-235': decaySolver.getActivityFromMass( 3.3*1E-2*PWR_M_U_INIT, 'U-235'),
-	'U-238': decaySolver.getActivityFromMass(96.7*1E-2*PWR_M_U_INIT, 'U-238')
+	'U-235': solver.getActivityFromMass( 3.3*1E-2*PWR_M_U_INIT, 'U-235'),
+	'U-238': solver.getActivityFromMass(96.7*1E-2*PWR_M_U_INIT, 'U-238')
 }
 
 
@@ -153,8 +154,8 @@ PER_MTHM = 1000 / PWR_M_U_INIT
 
 # Natural uranium required for a PWR fuel assembly, in Bq per assembly.
 NAT_URANIUM = {
-	'U-235': decaySolver.getActivityFromMass( 0.72*1E-2*PWR_M_U_NAT, 'U-235'),
-	'U-238': decaySolver.getActivityFromMass(99.28*1E-2*PWR_M_U_NAT, 'U-238')
+	'U-235': solver.getActivityFromMass( 0.72*1E-2*PWR_M_U_NAT, 'U-235'),
+	'U-238': solver.getActivityFromMass(99.28*1E-2*PWR_M_U_NAT, 'U-238')
 }
 
 
@@ -189,8 +190,8 @@ def getTotalActivityAndRadiotoxicity(nuclidesDict: dict[str, float], t: float) -
 	totalActivity = 0
 	totalRadiotoxicity = 0
 	for nuclide in nuclidesDict.keys():
-		initialAmount = nuclidesDict[nuclide] / decaySolver.getDecayConstant(nuclide)
-		a, d = decaySolver.getTotalActivityAtTime(initialAmount, nuclide, t)
+		initialAmount = nuclidesDict[nuclide] / solver.getDecayConstant(nuclide)
+		a, d = solver.getTotalActivityAtTime(initialAmount, nuclide, t)
 		totalActivity += a
 		for key in d.keys():
 			if (key in coefficientDict):
@@ -220,7 +221,7 @@ results999 = np.zeros((len(times), 2))# P&T of 99.9% of MA, Pu, and Tc-99
 
 # Activities in MBq are multiplied by 1E6; all are multiplied by PER_MTHM.
 for i in range(len(times)):
-	t = times[i]*spider.YEAR# Physical time
+	t = times[i]*solver.YEAR# Physical time
 
 	resultsNU[i] = getTotalActivityAndRadiotoxicity(NAT_URANIUM, t)
 

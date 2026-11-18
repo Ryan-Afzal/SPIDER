@@ -7,8 +7,7 @@
 #
 # To test, place the ICRP-07.NDX file in the same directory and run.
 
-import sources
-
+import src.sources as sources
 import unittest
 
 class TestNDX(unittest.TestCase):
